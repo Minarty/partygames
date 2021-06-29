@@ -1,0 +1,20 @@
+name: PartyGames
+version: "1.0"
+load: POSTWORLD
+api-version: "1.16"
+main: fun.minarty.partygames.PartyGames
+depend: [Gatus, Grand, SlimeWorldManager]
+softdepend: [FastAsyncWorldEdit]
+author: "Minarty"
+commands:
+    game: {}
+    lobby:
+        aliases: [l, leave, hub, quit]
+    ready: {}
+    gamevote: {}
+    world: {}
+    kit: {}
+    spectate: {}
+    serialize: {}
+    gamecreator: {}
+    schemtest: {}

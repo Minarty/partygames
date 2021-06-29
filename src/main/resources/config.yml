@@ -1,0 +1,40 @@
+worlds:
+  flat:
+    - new_bygg
+  void:
+    - games
+    - lobby
+motd: "                  <gradient:#0090ff:#6d758d>Minarty Games <#ff00d5>(Party)</#ff00d5></gradient>\n
+           <#f5001f>Maintenance / Underhållsarbete</#f5001f>"
+display:
+  tri_dodge: "TRIDENT"
+  boat_race: "OAK_BOAT"
+  wipeout: "SUGAR"
+  elytra: "ELYTRA"
+  anvil: "ANVIL"
+  mine_field: "STONE_PRESSURE_PLATE"
+  quake: "DIAMOND_HOE"
+  hot_floor: "CRIMSON_PLANKS"
+  match_the_wool: "PINK_WOOL"
+  flood_escape: "WATER_BUCKET"
+  sonic_sumo: "TROPICAL_FISH"
+  mini_skywars: "DIAMOND_SWORD"
+  animal_sniper: "BOW"
+  memory: "ITEM_FRAME"
+  quick_click: "STONE_BUTTON"
+  oitc: "WOODEN_SWORD"
+game:
+  min_players: 2
+redis:
+  host: localhost
+  port: 20
+  password: "password"
+levels:
+  '0': 0
+  '1': 9
+  '2': 50
+  '3': 100
+  '4': 200
+  '6': 300
+  '7': 500
+  '8': 900

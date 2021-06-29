@@ -1,0 +1,51 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'java'
+    id 'java-library'
+    id "io.freefair.lombok" version "5.3.3.3"
+}
+
+group 'fun.minarty'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+tasks.withType(Jar) {
+    destinationDirectory = file("/home/dev/build")
+}
+
+tasks.jar.enabled=false
+
+repositories {
+    maven { url "https://papermc.io/repo/repository/maven-public/" }
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url "https://mvn.intellectualsites.com/content/repositories/releases/" }
+}
+
+compileJava {
+    options.compilerArgs += ["-parameters"]
+}
+
+shadowJar {
+    configurations = [project.configurations.compile]
+}
+
+dependencies {
+    api('fun.minarty:gatus:1.0-SNAPSHOT')
+    implementation('fun.minarty:grand:1.0-SNAPSHOT')
+
+    implementation group: 'com.google.inject', name: 'guice', version: '5.0.1'
+
+    implementation "com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT"
+    implementation 'com.grinderwolf:slimeworldmanager-plugin:2.6.2-SNAPSHOT'
+
+    implementation("com.intellectualsites.fawe:FAWE-Bukkit:1.16-637")
+    implementation("com.intellectualsites.fawe:FAWE-Core:1.16-637")
+
+    compile 'com.github.Minikloon:FSMgasm:master'
+}
+
+build.dependsOn shadowJar
