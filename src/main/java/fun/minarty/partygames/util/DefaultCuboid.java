@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -133,6 +134,7 @@ public final class DefaultCuboid implements Cuboid, Iterable<Block> {
             b.setType(m);
     }
 
+    /*
     public int getSizeX() {
         return (x2 - x1) + 1;
     }
@@ -143,8 +145,9 @@ public final class DefaultCuboid implements Cuboid, Iterable<Block> {
 
     public int getSizeZ() {
         return (z2 - z1) + 1;
-    }
+    }*/
 
+    @Override
     public Location[] getCorners() {
         return new Location[] { this.high, new Location(
                 getWorld(), this.high.getX(), this.high.getY(), this.low.getZ()), new Location(
@@ -155,6 +158,7 @@ public final class DefaultCuboid implements Cuboid, Iterable<Block> {
                 getWorld(), this.high.getX(), this.low.getY(), this.low.getZ()) };
     }
 
+    /*
     public List<DefaultCuboid> getWalls(boolean cover) {
         List<DefaultCuboid> walls = new ArrayList<>();
         walls.add(new DefaultCuboid(getCorners()[4], getCorners()[3]));
@@ -187,7 +191,7 @@ public final class DefaultCuboid implements Cuboid, Iterable<Block> {
 
     public Location getUpperSW() {
         return new Location(this.getWorld(), this.x2, this.y2, this.z2);
-    }
+    } */
 
     private World getWorld() {
         World w = Bukkit.getWorld(worldName);
@@ -205,6 +209,7 @@ public final class DefaultCuboid implements Cuboid, Iterable<Block> {
     }
 
     @Override
+    @NotNull
     public Iterator<Block> iterator() {
         return new CuboidIterator(getWorld(), x1, y1, z1, x2, y2, z2);
     }

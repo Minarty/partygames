@@ -174,7 +174,7 @@ public class GameManager {
                 World world = mapManager.loadSlimeWorld(slimeWorld);
 
                 ConfigManager configManager   = plugin.getStoreProvider().getConfigManager();
-                GameConfig config             = configManager.load(type);
+                GameConfig config             = configManager.loadConfig(type);
 
                 if(config == null){
                     plugin.getLogger().warning("No config found for " + type.name() + "!");

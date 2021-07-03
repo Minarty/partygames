@@ -38,8 +38,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Locale;
 
 /**
- * Main class of the plugin, responsible for creating most
- * instances and providing them when needed
+ * Main class of the plugin, entry point for many instances <br>
+ * and provides common methods
  */
 @Getter
 public final class PartyGames extends JavaPlugin {
@@ -95,16 +95,10 @@ public final class PartyGames extends JavaPlugin {
     public void onEnable() {
         eventManager = new GameEventManager(this);
 
-        World lobbyWorld = Bukkit.getWorld("lobby");
-        if(lobbyWorld != null){
-            lobbyWorld.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-            lobbyWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-            lobbyWorld.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-            lobbyWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-        }
-
         getConfig().options().copyDefaults(true);
         saveConfig();
+
+        setupLobby();
 
         minimumPlayers = getConfig().getInt("game.min_players");
         kitManager.load(getDataFolder());
@@ -113,15 +107,10 @@ public final class PartyGames extends JavaPlugin {
         registerExternal();
         registerListeners();
 
-        Plugin worldEditPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
-        if(worldEditPlugin != null) {
-            this.worldEdit = (WorldEditPlugin) worldEditPlugin;
-        }
+        loadedSchematics = new LoadedSchematics(this);
+        loadedSchematics.loadDefault();
 
-        // TODO move to config
-        lobbyLocation = new Location(lobbyWorld,
-                20.5, 68, 20.5, -180, -1);
-
+        // In case of reload
         Bukkit.getOnlinePlayers().forEach(player -> {
             GamePlayer gamePlayer = playerManager.cachePlayer(player);
             scoreboardManager.setScoreboard(gamePlayer, PartyScoreboardManager.Type.LOBBY);
@@ -143,14 +132,50 @@ public final class PartyGames extends JavaPlugin {
 
         registerCommonPlaceholders(common);
 
+        Plugin worldEditPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
+        if(worldEditPlugin != null) {
+            this.worldEdit = (WorldEditPlugin) worldEditPlugin;
+        }
+
         grand = (Grand) getServer().getPluginManager().getPlugin("Grand");
         if(grand == null)
             return;
 
+        setupLocalization();
+        registerListeners();
+
         getServer().getPluginManager()
                 .registerEvents(new GrandListener(this, grand), this);
+
         storeProvider.loadStores(this, common.getMongoManager());
 
+        hotbarManager = common.getHotbarManager();
+        scoreboardManager = new PartyScoreboardManager(this);
+        profileManager = new ProfileManager(this, storeProvider.getProfileStore());
+        menuManager = common.getMenuManager();
+    }
+
+    /**
+     * Sets important rules in the lobby world and loads the lobby location
+     */
+    private void setupLobby(){
+        World lobbyWorld = Bukkit.getWorld("lobby");
+        if(lobbyWorld != null){
+            lobbyWorld.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+            lobbyWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+            lobbyWorld.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+            lobbyWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        }
+
+        // TODO move to config
+        lobbyLocation = new Location(lobbyWorld,
+                20.5, 68, 20.5, -180, -1);
+    }
+
+    /**
+     * Sets up the localization with Texty
+     */
+    private void setupLocalization(){
         ResourceBundleLocalizationSource source = ResourceBundleLocalizationSource.builder()
                 .withBaseName("PartyGames")
                 .withClass(getClass())
@@ -174,13 +199,6 @@ public final class PartyGames extends JavaPlugin {
                 .build();
 
         texty.register();
-
-        loadedSchematics = new LoadedSchematics(this);
-
-        hotbarManager = common.getHotbarManager();
-        scoreboardManager = new PartyScoreboardManager(this);
-        profileManager = new ProfileManager(this, storeProvider.getProfileStore());
-        menuManager = common.getMenuManager();
     }
 
     /**
@@ -242,7 +260,11 @@ public final class PartyGames extends JavaPlugin {
         command.setExecutor(executor);
     }
 
-    public void transformLobbyPlayer(Player player){
+    /**
+     * Sets all the vanilla values for the player and teleports them to the lobby
+     * @param player player to transform
+     */
+    private void transformLobbyPlayer(Player player){
         player.getInventory().clear();
         player.setHealth(20);
         player.setFoodLevel(20);
@@ -255,6 +277,10 @@ public final class PartyGames extends JavaPlugin {
         player.teleport(lobbyLocation);
     }
 
+    /**
+     * Applies the lobby load-out that depends on localized text
+     * @param gamePlayer game player to apply to
+     */
     public void applyLocalizedLobby(GamePlayer gamePlayer){
         Player player = gamePlayer.getBukkitPlayer();
         getScoreboardManager().setScoreboard(gamePlayer, PartyScoreboardManager.Type.LOBBY);
@@ -276,19 +302,20 @@ public final class PartyGames extends JavaPlugin {
     }
 
     /**
-     * Loads the lobby loadout for the player, sets
+     * Loads the lobby loadout for the player, sets <br>
      * appropriate health, inventory etc
      *
      * @param gamePlayer gameplayer to load loadout for
-     * @param postGame   whether or not this is called during post-game state
+     * @param logIn whether this player has just logged in
+     * @param postGame   whether this is called during post-game state
      */
     public void sendToLobby(GamePlayer gamePlayer, boolean logIn, boolean postGame) {
         Player player = gamePlayer.getBukkitPlayer();
-        if (!postGame)
+        if (!postGame) // If this is post game,
             gameManager.clearGameFromPlayer(player);
 
         transformLobbyPlayer(player);
-        if(!logIn)
+        if(!logIn) // If it's login this will be applied when the client locale is ready, which it isn't directly.
             applyLocalizedLobby(gamePlayer);
     }
 

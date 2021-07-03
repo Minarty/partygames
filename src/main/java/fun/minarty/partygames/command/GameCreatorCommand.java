@@ -33,13 +33,16 @@ import java.util.*;
  */
 public class GameCreatorCommand implements CommandExecutor {
 
-    private GameType current;
-    private final Map<String, Object> editSession = new HashMap<>();
+    // TODO this class needs some refactoring and command validation, description etc
+
+    private GameType currentGame;
+    private final Map<String, Object> sessions = new HashMap<>();
     private final Map<String, Map<String, Object>> customObjects = new HashMap<>();
     private final Map<UUID, Object> property = new HashMap<>();
-    private static final UUID CONSOLE_UUID = UUID.randomUUID();
 
+    private static final UUID CONSOLE_UUID = UUID.randomUUID();
     private static final DefaultConfig DEFAULT_CONFIG = new DefaultConfig();
+    private static final String CUSTOM_OBJECT_PREFIX = "custom:";
 
     private final PartyGames plugin;
 
@@ -47,7 +50,7 @@ public class GameCreatorCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
@@ -76,29 +79,29 @@ public class GameCreatorCommand implements CommandExecutor {
         boolean customObj = args.length == 4;
         switch (args[0]){
             case "edit":{
-                if (current != null) {
+                if (currentGame != null) {
                     sender.sendMessage("Not saved, use /gamecreator discard");
                     return true;
                 }
 
                 sender.sendMessage("Loading config..");
 
-                current = GameType.valueOf(args[1]);
-                GameConfig config = plugin.getStoreProvider().getConfigManager().load(current);
+                currentGame = GameType.valueOf(args[1]);
+                GameConfig config = plugin.getStoreProvider().getConfigManager().loadConfig(currentGame);
                 if(config == null){
                     sender.sendMessage("Could not load config.");
                     return true;
                 }
 
-                editSession.clear();
+                sessions.clear();
 
                 try {
-                    editSession.putAll(getValues(config));
+                    sessions.putAll(getValues(config));
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
 
-                sender.sendMessage("Loaded " + editSession.keySet().size() + " keys from config for game type " + current.name());
+                sender.sendMessage("Loaded " + sessions.keySet().size() + " keys from config for game type " + currentGame.name());
                 break;
             }
 
@@ -128,7 +131,7 @@ public class GameCreatorCommand implements CommandExecutor {
 
                 Object typeObject;
                 if(type.startsWith("custom:")){
-                    String customId = type.split("custom:")[1];
+                    String customId = type.split(CUSTOM_OBJECT_PREFIX)[1];
                     typeObject = customObjects.get(customId);
                 } else {
                     typeObject = getTypeObject(player, type);
@@ -137,7 +140,7 @@ public class GameCreatorCommand implements CommandExecutor {
                 if(customObj){
                     putCustomObject(args[3], name, typeObject);
                 } else {
-                    editSession.put(name, typeObject);
+                    sessions.put(name, typeObject);
                 }
 
                 sender.sendMessage("Set object " + name);
@@ -151,7 +154,7 @@ public class GameCreatorCommand implements CommandExecutor {
 
                 Object typeObject;
                 if(type.startsWith("custom:")){
-                    String customId = type.split("custom:")[1];
+                    String customId = type.split(CUSTOM_OBJECT_PREFIX)[1];
                     typeObject = customObjects.get(customId);
                 } else {
                     typeObject = getTypeObject(player, type);
@@ -168,12 +171,12 @@ public class GameCreatorCommand implements CommandExecutor {
                     list.add(typeObject);
                     putCustomObject(args[3], name, list);
                 } else {
-                    List list = getOrCreateList(name, editSession);
+                    List list = getOrCreateList(name, sessions);
                     if(list == null)
                         return true;
 
                     list.add(typeObject);
-                    editSession.put(name, list);
+                    sessions.put(name, list);
                 }
 
                 sender.sendMessage("Added object to list " + name);
@@ -182,15 +185,15 @@ public class GameCreatorCommand implements CommandExecutor {
             }
 
             case "discard":{
-                current = null;
-                editSession.clear();
+                currentGame = null;
+                sessions.clear();
 
                 sender.sendMessage("Discarded config");
                 break;
             }
 
             case "clearobject":{
-                editSession.remove(args[1]);
+                sessions.remove(args[1]);
                 break;
             }
 
@@ -198,7 +201,7 @@ public class GameCreatorCommand implements CommandExecutor {
                 ObjectMapper mapper = plugin.getStoreProvider().getConfigManager().getMapper();
 
                 try {
-                    sender.sendMessage(mapper.writeValueAsString(editSession));
+                    sender.sendMessage(mapper.writeValueAsString(sessions));
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
@@ -213,7 +216,7 @@ public class GameCreatorCommand implements CommandExecutor {
                 if(defaultValues == null)
                     return true;
 
-                Iterator<Map.Entry<String, Object>> it = editSession.entrySet().iterator();
+                Iterator<Map.Entry<String, Object>> it = sessions.entrySet().iterator();
                 while (it.hasNext()){ // Remove entries that haven't been changed
                     Map.Entry<String, Object> entry = it.next();
                     String key = entry.getKey();
@@ -227,20 +230,20 @@ public class GameCreatorCommand implements CommandExecutor {
                     }
                 }
 
-                if(current == null)
+                if(currentGame == null)
                     System.out.print("current null?");
 
                 try {
                     plugin.getCommon().getMongoManager().getDatabase()
                             .getCollection("party_gameconfig")
-                            .replaceOne(Filters.eq("gameType", current.name()),
-                                    Document.parse(mapper.writeValueAsString(editSession)));
+                            .replaceOne(Filters.eq("gameType", currentGame.name()),
+                                    Document.parse(mapper.writeValueAsString(sessions)));
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
 
                 sender.sendMessage("Successfully saved!");
-                current = null;
+                currentGame = null;
 
                 break;
             }

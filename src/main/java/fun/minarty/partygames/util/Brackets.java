@@ -3,6 +3,9 @@ package fun.minarty.partygames.util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 
+/**
+ * Util to create parentheses around components
+ */
 public final class Brackets {
 
     private Brackets(){ }
@@ -14,6 +17,7 @@ public final class Brackets {
     }
 
     public enum Type {
+
         PARENTHESES('(', ')'),
         SQUARE('[', ']');
 

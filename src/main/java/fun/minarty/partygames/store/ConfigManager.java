@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * Manages the external game config loading, also sets up <br>
- * Jackson to serialize/deserialize the data
+ * the Jackson ObjectMapper to serialize/deserialize data
  */
 public class ConfigManager {
 
@@ -68,35 +68,30 @@ public class ConfigManager {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public GameConfig load(GameType gameType){
+    public GameConfig loadConfig(GameType gameType){
         plugin.getLogger().info("Loading game config for " + gameType.name());
         loadedConfig = findConfig(gameType);
         return loadedConfig;
     }
 
-    private boolean hasRequiredFields(GameType type, Document document){
-        for (String requiredField : REQUIRED_FIELDS) {
-            if(!document.containsKey(requiredField)){
-                plugin.getLogger().warning(type.name() + " is missing required field " + requiredField + "!");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public @Nullable GameConfig findConfig(GameType gameType){
+    /**
+     * Loads a game config from MongoDB
+     * @param gameType type of the game
+     * @return found config or null if not found
+     */
+    private @Nullable GameConfig findConfig(GameType gameType){
         GameConfig gameConfig = null;
         for (Document document : collection.find(Filters.eq("gameType", gameType.name()))) {
             plugin.getLogger().info("Found config");
 
-            if(!hasRequiredFields(gameType, document))
+            if(!validateRequiredFields(gameType, document))
                 continue;
 
             try {
                 gameConfig = mapper.readValue(document.toJson(), GameManager.GAME_TYPES.get(gameType).getConfigClass());
                 if(gameConfig == null)
                     plugin.getLogger().warning("An error occurred parsing " + gameType.name());
+
                 break;
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -107,16 +102,38 @@ public class ConfigManager {
         return gameConfig;
     }
 
+    /**
+     * Validates that a document has all the required fields, otherwise <br>
+     * log warning for each missing field.
+     *
+     * @param type type of the game
+     * @param document document to validate
+     * @return whether the document has all the required fields
+     */
+    private boolean validateRequiredFields(GameType type, Document document){
+        for (String requiredField : REQUIRED_FIELDS) {
+            if(!document.containsKey(requiredField)){
+                plugin.getLogger().warning(type.name() + " is missing required field " + requiredField + "!");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private <T> void deserializeAs(SimpleModule module, Class<T> base, Class<? extends T> implClass){
         module.addDeserializer(base, new DeserializeAs<>(base, implClass));
     }
 
-    // TODO a class most definitely already exists, I was just too lazy to search for it
+    /**
+     * Deserializes a base class as the implementation class specified
+     * @param <T> type of the base class
+     */
     private static final class DeserializeAs<T> extends StdDeserializer<T> {
 
         private final Class<? extends T> implClass;
 
-        protected DeserializeAs(Class<?> base, Class<? extends T> implClass) {
+        protected DeserializeAs(Class<T> base, Class<? extends T> implClass) {
             super(base);
             this.implClass = implClass;
         }
