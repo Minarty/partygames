@@ -31,6 +31,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -173,9 +174,18 @@ public final class PartyGames extends JavaPlugin {
             lobbyWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
         }
 
-        // TODO move to config
+        ConfigurationSection lobbySection = getConfig().getConfigurationSection("lobby");
+        if(lobbySection == null)
+            return;
+
+        double x = lobbySection.getDouble("x");
+        double y = lobbySection.getDouble("y");
+        double z = lobbySection.getDouble("z");
+        float yaw = (float) lobbySection.getDouble("yaw");
+        float pitch = (float) lobbySection.getDouble("pitch");
+
         lobbyLocation = new Location(lobbyWorld,
-                20.5, 68, 20.5, -180, -1);
+                x, y, z, yaw, pitch);
     }
 
     /**

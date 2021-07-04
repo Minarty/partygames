@@ -20,11 +20,9 @@ import java.util.List;
  * Config class containing direct access to all config fields <br>
  * most of them have default values if no entry was found
  */
-@SuppressWarnings("FieldMayBeFinal") // We want to keep them modifiable so we can use the gameconfig command
+@SuppressWarnings("FieldMayBeFinal") // Accessible so that we can override them, might work anyway?
 @Getter
 public class DefaultConfig implements GameConfig {
-
-    // TODO we are allocating "constant values" every time we load a config :(
 
     private GameType gameType = GameType.ANVIL;
     private Material displayMaterial = Material.DIAMOND;

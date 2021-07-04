@@ -1,3 +1,9 @@
+lobby:
+  x: 20.5
+  y: 68
+  z: 20.5
+  yaw: -180
+  pitch: -1
 worlds:
   flat:
     - new_bygg

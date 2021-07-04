@@ -144,10 +144,7 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
         addConditionalState(states, new CheckpointFeature(this, plugin), GameConfig.Conditions.CHECKPOINTS);
         addConditionalState(states, new MaxYLevelFeature(this, plugin), config.getMaxYLevel() != 0);
         addConditionalState(states, new PvPPointsFeature(this, plugin), config.isPvpPoints());
-
-        // TODO condition
-        addConditionalState(states, new DeadlyBlockFeature(this, plugin),
-                config.getDeadlyBlocks() != null && config.getDeadlyBlocks().size() > 0);
+        addConditionalState(states, new DeadlyBlockFeature(this, plugin), GameConfig.Conditions.DEADLY_BLOCKS);
 
         return states;
     }
