@@ -1,5 +1,6 @@
 package fun.minarty.partygames.manager;
 
+import fun.minarty.partygames.api.model.kit.Kit;
 import fun.minarty.partygames.model.kit.DefaultKit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -54,13 +55,17 @@ public class KitManager {
         ConfigurationSection section = config.createSection("kits." + name);
         DefaultKit kit = DefaultKit.toConfig(inventory, name, section);
 
+        saveConfig();
+
+        kits.add(kit);
+    }
+
+    private void saveConfig(){
         try {
             config.save(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        kits.add(kit);
     }
 
     /**
@@ -73,6 +78,12 @@ public class KitManager {
                 .filter(kit -> kit.getName().equalsIgnoreCase(name))
                 .findAny()
                 .orElse(null);
+    }
+
+    public void delete(Kit kit) {
+        config.set("kits." + kit.getName(), null);
+        saveConfig();
+        kits.remove((DefaultKit) kit);
     }
 
 }

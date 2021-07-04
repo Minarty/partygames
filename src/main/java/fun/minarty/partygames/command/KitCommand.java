@@ -2,6 +2,7 @@ package fun.minarty.partygames.command;
 
 import fun.minarty.partygames.PartyGames;
 import fun.minarty.partygames.api.model.kit.Kit;
+import fun.minarty.partygames.manager.KitManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -33,14 +34,20 @@ public class KitCommand implements CommandExecutor {
             return true;
 
         Player player = (Player)sender;
+        KitManager kitManager = plugin.getKitManager();
         switch (args[0].toLowerCase()){
             case "save":{
                 if(args.length != 2)
                     return true;
 
-                // TODO Possibly add a "already exists" check
+                String name = args[1];
 
-                plugin.getKitManager().save(args[1], player.getInventory());
+                if(kitManager.getKitByName(name) != null){
+                    player.sendMessage("There already exists a kit with that name!");
+                    return true;
+                }
+
+                kitManager.save(args[1], player.getInventory());
                 player.sendMessage("Saved kit " + args[1]);
 
                 break;
@@ -50,12 +57,29 @@ public class KitCommand implements CommandExecutor {
                 if(args.length != 2)
                     return true;
 
-                Kit kit = plugin.getKitManager().getKitByName(args[1]);
-                if(kit == null)
+                Kit kit = kitManager.getKitByName(args[1]);
+                if(kit == null) {
+                    sender.sendMessage("Unknown kit.");
                     return true;
+                }
 
                 kit.apply(player);
                 player.sendMessage("Applied " + args[1]);
+                break;
+            }
+
+            case "delete":{
+
+                String name = args[1];
+
+                Kit kit = kitManager.getKitByName(name);
+                if(kit == null) {
+                    sender.sendMessage("Unknown kit.");
+                    return true;
+                }
+
+                kitManager.delete(kit);
+                sender.sendMessage("Successfully deleted kit" + name);
                 break;
             }
         }

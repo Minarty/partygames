@@ -113,6 +113,7 @@ public class QuakeGame extends PartyGame {
 
         private void spawnRay(Player player){
             Vector direction = player.getEyeLocation().getDirection();
+            System.out.println("CALLING");
             Bukkit.getPluginManager().callEvent(new QuakeShootEvent(game, player));
 
             RayTraceResult rayTraceResult = player.getWorld().rayTrace(player.getEyeLocation(),

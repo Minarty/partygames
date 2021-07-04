@@ -21,6 +21,7 @@ import fun.minarty.partygames.model.game.GamePlayer;
 import fun.minarty.partygames.store.ProfileManager;
 import fun.minarty.partygames.store.StoreProvider;
 import fun.minarty.partygames.util.LoadedSchematics;
+import fun.minarty.partygames.util.StatisticHandler;
 import fun.minarty.partygames.util.cooldown.Cooldowner;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,10 +32,16 @@ import org.bukkit.*;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Locale;
 
 /**
@@ -142,7 +149,6 @@ public final class PartyGames extends JavaPlugin {
             return;
 
         setupLocalization();
-        registerListeners();
 
         getServer().getPluginManager()
                 .registerEvents(new GrandListener(this, grand), this);
@@ -211,7 +217,40 @@ public final class PartyGames extends JavaPlugin {
         pluginManager.registerEvents(new LobbyListener(), this);
         pluginManager.registerEvents(new SpectatorListener(this), this);
         pluginManager.registerEvents(new ProtectionListener(this), this);
-        pluginManager.registerEvents(new StatisticListener(this), this);
+
+        Method[] methods = StatisticListener.class.getMethods();
+        for (Method method : methods) {
+            StatisticHandler annotation = method.getAnnotation(StatisticHandler.class);
+            if(annotation == null)
+                continue;
+
+            Parameter[] parameters = method.getParameters();
+            if(parameters.length < 1)
+                continue;
+
+            Parameter firstParam = parameters[0];
+            Class<?> type = firstParam.getType();
+
+            if(!Event.class.isAssignableFrom(type))
+                continue;
+
+            Class<? extends Event> eventClass = type.asSubclass(Event.class);
+            pluginManager.registerEvent(eventClass, new StatisticListener(this), EventPriority.MONITOR, (listener, event) -> {
+                if(!(event instanceof Cancellable) || !((Cancellable) event).isCancelled()){
+                    try {
+                        if (!eventClass.isAssignableFrom(event.getClass())) {
+                            return;
+                        }
+
+                        System.out.println(event.getEventName());
+
+                        method.invoke(listener, event);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, this);
+        }
     }
 
     /**

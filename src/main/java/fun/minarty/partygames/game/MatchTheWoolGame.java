@@ -66,7 +66,6 @@ public class MatchTheWoolGame extends PartyGame {
             Block blockAgainst = event.getBlockAgainst();
             event.setCancelled(true);
 
-            // TODO actually prevent spam clicking, z value different ? ? ?
             if(blockAgainst.getType() == event.getBlock().getType() && !plugin.getCooldowner().hasCooldown(player.getUniqueId())){
                 plugin.getCooldowner().cooldown(player.getUniqueId(), 100, ChronoUnit.MILLIS);
                 event.getBlock().setType(Material.AIR);

@@ -8,6 +8,7 @@ import fun.minarty.partygames.event.QuakeShootEvent;
 import fun.minarty.partygames.game.MineFieldGame;
 import fun.minarty.partygames.manager.StatisticManager;
 import fun.minarty.partygames.util.MiscUtil;
+import fun.minarty.partygames.util.StatisticHandler;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -32,12 +33,12 @@ public class StatisticListener implements Listener {
         this.statisticManager = plugin.getStatisticManager();
     }
 
-    @EventHandler
+    @StatisticHandler
     public void onPlayerKilled(PlayerKilledEvent event) {
         statisticManager.incrementStatistic(event.getKiller(), GameStatistic.KILLS);
     }
 
-    @EventHandler
+    @StatisticHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         Entity entity = event.getEntity();
         Player playerDamager = MiscUtil.getPlayerDamager(event);
@@ -51,40 +52,32 @@ public class StatisticListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @StatisticHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        if(event.isCancelled())
-            return;
-
         statisticManager.incrementStatistic(event.getPlayer(), GameStatistic.BLOCKS_BROKEN);
     }
 
-    @EventHandler
+    @StatisticHandler
     public void onQuakeHit(QuakeHitEvent event){
         statisticManager.incrementStatistic(event.getPlayer(), GameStatistic.PISTOL_HITS);
     }
 
-    @EventHandler
+    @StatisticHandler
     public void onQuakeShoot(QuakeShootEvent event){
         statisticManager.incrementStatistic(event.getPlayer(), GameStatistic.PISTOL_SHOTS);
     }
 
-    @EventHandler
+    @StatisticHandler
     public void onMineDetonate(MineFieldGame.MineDetonateEvent event){
         statisticManager.incrementStatistic(event.getPlayer(), GameStatistic.MINES_DETONATED);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @StatisticHandler
     public void onBlockBreak(BlockPlaceEvent event) {
-        if(event.isCancelled())
-            return;
-
         statisticManager.incrementStatistic(event.getPlayer(), GameStatistic.BLOCKS_PLACED);
     }
 
-    // TODO maybe all should check cancelled first?
-
-    @EventHandler
+    @StatisticHandler
     public void onProjectileLaunch(ProjectileLaunchEvent event) {
         Projectile entity = event.getEntity();
         ProjectileSource shooter = entity.getShooter();
@@ -94,7 +87,7 @@ public class StatisticListener implements Listener {
         }
     }
 
-    @EventHandler
+    @StatisticHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         statisticManager.incrementStatistic(event.getEntity(), GameStatistic.DEATHS);
     }

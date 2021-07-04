@@ -43,7 +43,7 @@ public class GameVoteCommand implements CommandExecutor {
 
         GamePlayer gamePlayer = plugin.getPlayerManager().getGamePlayerByPlayer(player);
         if(gamePlayer == null || !gamePlayer.isReady()){
-            // TODO msg
+            player.sendMessage(translatable("generic.not_ready", NamedTextColor.RED));
             return true;
         }
 

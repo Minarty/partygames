@@ -25,12 +25,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Game event manager, listens to every event and maps as best as possible
- * to a certain game, so that only players in that game will be affected
+ * Game event manager, listens to every event and maps as best as possible <br>
+ * to a certain game, so that only players in that game will be affected.
  */
 public class GameEventManager implements Listener {
-
-    // TODO This class needs documentation
 
     private final PartyGames plugin;
     private final List<GameEventListener> eventListeners = new ArrayList<>();
@@ -39,19 +37,19 @@ public class GameEventManager implements Listener {
         this.plugin = plugin;
     }
 
-    public void registerEvent(Class<? extends Event> event, Listener listener, EventPriority priority,
-                              EventExecutor executor, Plugin plugin, boolean ignoreCancelled) {
-
-        TimedRegisteredListener customListener = new TimedRegisteredListener(listener, executor, priority,
-                plugin, ignoreCancelled);
-
-        getEventListeners(event).register(customListener);
-    }
-
     public <T extends Event> void registerListener(Listener listener, Class<T> eventClass){
         EventExecutor customExecutor = this::onEvent;
-        registerEvent(eventClass, listener, EventPriority.HIGHEST,
-                customExecutor, plugin, false);
+        registerEvent(eventClass, listener,
+                customExecutor, plugin);
+    }
+
+    private void registerEvent(Class<? extends Event> event, Listener listener,
+                               EventExecutor executor, Plugin plugin) {
+
+        TimedRegisteredListener customListener = new TimedRegisteredListener(listener, executor,
+                EventPriority.HIGHEST, plugin, false);
+
+        getEventListeners(event).register(customListener);
     }
 
     public GameEventListener getGameListener(World world){

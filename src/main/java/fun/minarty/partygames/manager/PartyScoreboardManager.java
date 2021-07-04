@@ -43,7 +43,6 @@ public class PartyScoreboardManager {
      * @param type scoreboard type to set
      */
     public void setScoreboard(GamePlayer player, Type type){
-
         Player bukkitPlayer = player.getBukkitPlayer();
         User user = plugin.getGrand().getApi().getUserByUniqueId(player.getUniqueId());
         TextFormatter textFormatter = plugin.getGrand().getTextFormatter();
@@ -68,67 +67,6 @@ public class PartyScoreboardManager {
             return;
 
         scoreboardManager.showScoreboard(bukkitPlayer, scoreboard);
-
-        /*
-        User user = plugin.getGrand().getApi().getUserByUniqueId(player.getUniqueId());
-        TextFormatter textFormatter = plugin.getGrand().getTextFormatter();
-
-        if(user == null || textFormatter == null)
-            return;
-
-        Player bukkitPlayer = player.getBukkitPlayer();
-
-        ScoreboardEntryRepository repository = ScoreboardEntryRepository.create();
-        repository.empty();
-
-        // If the type isn't lobby, it's a game scoreboard
-        if (type != Type.LOBBY) {
-            Game game = player.getGame();
-            if(game != null) {
-                // General entries to always show on games
-                createEntry(repository, "game",
-                        Component.translatable("games." + game.getType().name().toLowerCase() + ".name"));
-
-                createEntry(repository, "time",
-                        Component.text(TextUtil.formatGameDuration(game.getConfig().getDuration())));
-
-                // Show players left for games of the type PRESENCE
-                if(game.getConfig().getMode() == GameMode.PRESENCE){
-                    repository.empty();
-                    createEntry(repository, "players", Component.text(String.valueOf(game.getActivePlayers().size())));
-                }
-            }
-        } else {
-            createEntry(repository, "tickets", textFormatter.formatBalance(user.getTickets()));
-            createEntry(repository, "coins", textFormatter.formatBalance(user.getBalance()));
-        }
-
-        // Show points top players
-        if(type == Type.POINTS) {
-            Game game = player.getGame();
-            if(game != null) {
-                repository.empty();
-                repository.set("topTitle", new ScoreboardEntry(Component.translatable("scoreboard.top",
-                        Style.style(NamedTextColor.AQUA, TextDecoration.BOLD))));
-
-                int entriesToAdd = Math.min(game.getActivePlayers().size(), 5);
-                for (int i = 0; i < entriesToAdd; i++) {
-                    GamePlayer gamePlayer = game.getActivePlayers().get(i);
-                    if(gamePlayer == null)
-                        continue;
-
-                    Player p = gamePlayer.getBukkitPlayer();
-                    if(p == null)
-                        continue;
-
-                    repository.set("topEntry" + i, new ScoreboardEntry(formatTopPlayerEntry(i, p.displayName(), 0)));
-                }
-            }
-        }
-
-        repository.empty();
-
-         */
     }
 
     /**
@@ -153,21 +91,20 @@ public class PartyScoreboardManager {
      */
     public void updateGameScoreboard(){
 
-        // TODO fix this mess
-
         PartyGame game = plugin.getGameManager().getGame();
         if(game == null)
             return;
 
         final Set<Map.Entry<GamePlayer, Integer>> topEntries;
-        if(game.getConfig().getMode() == PlayMode.POINTS) {
+
+        if(game.getConfig().getMode() == PlayMode.POINTS) { // We only need this leaderboard if the play mode is points
             topEntries = game.getTopPointsPlayersByPoints().entrySet();
         } else {
             topEntries = null;
         }
 
         long remainingDuration = plugin.getGameManager().getMainState().getRemainingSeconds();
-        String format = String.format("%02d:%02d", remainingDuration / 60, remainingDuration % 60);
+        String remainingTime = String.format("%02d:%02d", remainingDuration / 60, remainingDuration % 60);
 
         game.getPlayers().forEach(gamePlayer -> {
             Player player = gamePlayer.getBukkitPlayer();
@@ -177,22 +114,21 @@ public class PartyScoreboardManager {
                 ScoreboardEntry time = scoreboard.getEntryById("time");
                 if (time != null) {
                     time.update(ScoreboardConstants.FORMAT
-                            .format(Component.translatable("scoreboard.time"), Component.text(format)));
+                            .format(Component.translatable("scoreboard.time"), Component.text(remainingTime)));
                 }
 
                 // Show top players by points
-                if(game.getConfig().getMode() == PlayMode.POINTS && topEntries != null){
+                if(topEntries != null){
                     int i = 0;
                     for (Map.Entry<GamePlayer, Integer> topEntry : topEntries) {
-                        // Stop showing more if we have reached the limit or the amount of active players
+                        // Stop adding entries if we have reached the limit of 5 or active players count
                         if (i == 6 || i == game.getActivePlayers().size()) {
                             break;
                         }
 
                         ScoreboardEntry entry = scoreboard.getEntryById("topEntry" + i);
-                        if(entry == null) {
+                        if(entry == null)
                             continue;
-                        }
 
                         GamePlayer key = topEntry.getKey();
 
@@ -206,9 +142,10 @@ public class PartyScoreboardManager {
 
                 // Show players left
                 if(game.getConfig().getMode() == PlayMode.PRESENCE){
-                    ScoreboardEntry players = scoreboard.getEntryById("players");
-                    if(players != null)
-                        players.update(ScoreboardConstants.FORMAT.format(Component.translatable("scoreboard.players"),
+                    ScoreboardEntry playerCountEntry = scoreboard.getEntryById("players");
+                    if(playerCountEntry != null)
+                        playerCountEntry.update(ScoreboardConstants.FORMAT.format(
+                                Component.translatable("scoreboard.players"),
                                 Component.text(String.valueOf(game.getActivePlayers().size()))));
                 }
 
@@ -221,10 +158,8 @@ public class PartyScoreboardManager {
      * Enum holding the different scoreboard types
      */
     public enum Type {
-
         LOBBY,
         GAME
-
     }
 
 }
