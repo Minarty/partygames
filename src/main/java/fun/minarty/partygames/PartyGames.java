@@ -21,7 +21,6 @@ import fun.minarty.partygames.model.game.GamePlayer;
 import fun.minarty.partygames.store.ProfileManager;
 import fun.minarty.partygames.store.StoreProvider;
 import fun.minarty.partygames.util.LoadedSchematics;
-import fun.minarty.partygames.util.StatisticHandler;
 import fun.minarty.partygames.util.cooldown.Cooldowner;
 import lombok.Getter;
 import lombok.Setter;
@@ -230,7 +229,7 @@ public final class PartyGames extends JavaPlugin {
 
         Method[] methods = StatisticListener.class.getMethods();
         for (Method method : methods) {
-            StatisticHandler annotation = method.getAnnotation(StatisticHandler.class);
+            StatisticListener.StatisticHandler annotation = method.getAnnotation(StatisticListener.StatisticHandler.class);
             if(annotation == null)
                 continue;
 
@@ -251,8 +250,6 @@ public final class PartyGames extends JavaPlugin {
                         if (!eventClass.isAssignableFrom(event.getClass())) {
                             return;
                         }
-
-                        System.out.println(event.getEventName());
 
                         method.invoke(listener, event);
                     } catch (IllegalAccessException | InvocationTargetException e) {

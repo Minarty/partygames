@@ -76,9 +76,12 @@ public class ConnectionListener implements Listener {
         PlayerManager playerManager = plugin.getPlayerManager();
 
         GamePlayer gamePlayer = playerManager.getGamePlayerByPlayer(player);
+        if(gamePlayer == null)
+            return;
+
         playerManager.clearPlayer(gamePlayer);
 
-        if(playerManager.getGamePlayerByPlayer(player).getGame() == null)
+        if(gamePlayer.getGame() == null)
             playerManager.clearCache(player);
     }
 

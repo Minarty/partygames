@@ -27,6 +27,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -34,6 +35,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class GeneralGameListener implements Listener {
 
+    private static final PotionEffect RESPAWN_ANIMATION_EFFECT = new PotionEffect(PotionEffectType.BLINDNESS, 10, 0);
     private final PartyGames plugin;
 
     public GeneralGameListener(PartyGames plugin) {
@@ -136,10 +138,15 @@ public class GeneralGameListener implements Listener {
         } else {
 
             Cuboid checkpoint = (Cuboid) gamePlayer.getData("checkpoint");
+
             if (checkpoint != null) {
                 location = (checkpoint.getLow());
             } else {
-                location = (game.getConfig().getSpawns().get(ThreadLocalRandom.current().nextInt(game.getConfig().getSpawns().size())));
+                List<Location> spawns = game.getConfig().getSpawns();
+                if(spawns == null || !spawns.isEmpty())
+                    return;
+
+                location = spawns.get(ThreadLocalRandom.current().nextInt(spawns.size()));
             }
         }
 
@@ -150,14 +157,10 @@ public class GeneralGameListener implements Listener {
                 return;
             }
 
-            if(gamePlayer.getState() == GamePlayer.State.SPECTATOR){
-                player.setGameMode(GameMode.SPECTATOR);
-            }
-
             player.setGameMode(gamePlayer.getState() == GamePlayer.State.SPECTATOR
                     ? GameMode.SPECTATOR : game.getConfig().getGameMode());
 
-            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10, 0));
+            player.addPotionEffect(RESPAWN_ANIMATION_EFFECT);
             player.teleport(location);
 
             Kit kit = game.getConfig().getKit();

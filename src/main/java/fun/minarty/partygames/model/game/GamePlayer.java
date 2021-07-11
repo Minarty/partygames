@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Object connected to a specific player, contains
+ * Object connected to a specific player, contains <br>
  * game information, status, etc
  */
 public class GamePlayer {

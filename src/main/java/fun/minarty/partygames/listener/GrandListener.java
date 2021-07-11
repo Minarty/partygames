@@ -3,7 +3,9 @@ package fun.minarty.partygames.listener;
 import fun.minarty.api.user.User;
 import fun.minarty.grand.Grand;
 import fun.minarty.grand.event.UserUpdateEvent;
+import fun.minarty.grand.misc.TextFormatter;
 import fun.minarty.partygames.PartyGames;
+import fun.minarty.partygames.manager.PartyScoreboardManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,11 +30,14 @@ public class GrandListener implements Listener {
         if(player == null)
             return;
 
-        plugin.getScoreboardManager().updateEntry(player, "coins",
-                grand.getTextFormatter().formatBalance(user.getBalance()));
+        PartyScoreboardManager scoreboardManager = plugin.getScoreboardManager();
+        TextFormatter textFormatter = grand.getTextFormatter();
 
-        plugin.getScoreboardManager().updateEntry(player, "tickets",
-                grand.getTextFormatter().formatTickets(user.getTickets()));
+        scoreboardManager.updateEntry(player, "coins",
+                textFormatter.formatBalance(user.getBalance()));
+
+        scoreboardManager.updateEntry(player, "tickets",
+                textFormatter.formatTickets(user.getTickets()));
 
     }
 
