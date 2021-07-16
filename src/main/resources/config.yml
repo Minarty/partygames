@@ -4,14 +4,6 @@ lobby:
   z: 20.5
   yaw: -180
   pitch: -1
-worlds:
-  flat:
-    - new_bygg
-  void:
-    - games
-    - lobby
-motd: "                  <gradient:#0090ff:#6d758d>Minarty Games <#ff00d5>(Party)</#ff00d5></gradient>\n
-           <#f5001f>Maintenance / Underhållsarbete</#f5001f>"
 display:
   tri_dodge: "TRIDENT"
   boat_race: "OAK_BOAT"
@@ -31,10 +23,6 @@ display:
   oitc: "WOODEN_SWORD"
 game:
   min_players: 2
-redis:
-  host: localhost
-  port: 20
-  password: "password"
 levels:
   '0': 0
   '1': 9
