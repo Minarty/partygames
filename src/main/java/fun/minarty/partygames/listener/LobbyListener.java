@@ -1,6 +1,7 @@
 package fun.minarty.partygames.listener;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,10 +12,14 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 
+import java.util.Set;
+
 /**
  * Handles events called when the player is in the lobby
  */
 public class LobbyListener implements Listener {
+
+    private static final Set<EntityType> ALLOWED_ENTITY_TYPES = Set.of(EntityType.AXOLOTL);
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event){
@@ -24,7 +29,8 @@ public class LobbyListener implements Listener {
 
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event){
-        if(isInLobby(event.getEntity()))
+        Entity entity = event.getEntity();
+        if(isInLobby(event.getEntity()) && !ALLOWED_ENTITY_TYPES.contains(entity.getType()))
             event.setCancelled(true);
     }
 
@@ -50,6 +56,7 @@ public class LobbyListener implements Listener {
     }
 
     private boolean isInLobby(Entity entity){
+
         return entity.getWorld().getName().equals("lobby");
     }
 

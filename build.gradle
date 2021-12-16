@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
     id 'java'
     id 'java-library'
     id "io.freefair.lombok" version "5.3.3.3"
@@ -8,8 +8,8 @@ plugins {
 group 'fun.minarty'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 16
+targetCompatibility = 16
 
 tasks.withType(Jar) {
     destinationDirectory = file("/home/dev/build")
@@ -30,7 +30,7 @@ compileJava {
 }
 
 shadowJar {
-    configurations = [project.configurations.compile]
+    configurations = [project.configurations.shadow]
 }
 
 dependencies {
@@ -39,13 +39,13 @@ dependencies {
 
     implementation group: 'com.google.inject', name: 'guice', version: '5.0.1'
 
-    implementation "com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT"
+    implementation "io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT"
     implementation 'com.grinderwolf:slimeworldmanager-plugin:2.6.2-SNAPSHOT'
 
-    implementation("com.intellectualsites.fawe:FAWE-Bukkit:1.16-637")
-    implementation("com.intellectualsites.fawe:FAWE-Core:1.16-637")
+    implementation("com.fastasyncworldedit:FAWE-Bukkit:1.17-157")
+    implementation("com.fastasyncworldedit:FAWE-Core:1.17-157")
 
-    compile 'com.github.Minikloon:FSMgasm:master'
+    shadow 'com.github.Minikloon:FSMgasm:master'
 }
 
 build.dependsOn shadowJar

@@ -72,10 +72,9 @@ public class GeneralGameListener implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event){
-        if(!(event.getEntity() instanceof Player))
+        if(!(event.getEntity() instanceof Player player))
             return;
 
-        Player player = (Player) event.getEntity();
         Player playerDamager = MiscUtil.getPlayerDamager(event);
 
         if(playerDamager != null)
@@ -136,14 +135,13 @@ public class GeneralGameListener implements Listener {
         if(game == null) {
             location = plugin.getLobbyLocation();
         } else {
-
             Cuboid checkpoint = (Cuboid) gamePlayer.getData("checkpoint");
 
             if (checkpoint != null) {
                 location = (checkpoint.getLow());
             } else {
                 List<Location> spawns = game.getConfig().getSpawns();
-                if(spawns == null || !spawns.isEmpty())
+                if(spawns == null || spawns.isEmpty())
                     return;
 
                 location = spawns.get(ThreadLocalRandom.current().nextInt(spawns.size()));
