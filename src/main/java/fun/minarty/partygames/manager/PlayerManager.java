@@ -25,6 +25,10 @@ public class PlayerManager {
      * @return the instance of the new GamePlayer
      */
     public GamePlayer cachePlayer(Player player){
+        GamePlayer prev = getGamePlayerByPlayer(player);
+        if(prev != null)
+            return prev;
+
         GamePlayer gamePlayer = new GamePlayer(player.getUniqueId(), player.getUniqueId());
         playerCache.put(player.getUniqueId(), gamePlayer);
         return gamePlayer;

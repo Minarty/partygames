@@ -123,7 +123,7 @@ public class BoatRaceGame extends PartyGame {
                 return;
 
             float yaw = spawns.get(0).getYaw();
-            game.getPlayers().forEach(gamePlayer -> {
+            game.getActivePlayers().forEach(gamePlayer -> {
                 Player player = gamePlayer.getBukkitPlayer();
                 Location location = player.getLocation().clone();
                 location.setYaw(yaw);

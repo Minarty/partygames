@@ -215,7 +215,6 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
         ended = true;
 
         ScoreTableEntry[] scores = getScoreTable();
-
         announce(Component.empty(), false);
 
         if(scores[0] == null)
@@ -247,17 +246,15 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
      * @param i     place of the entry
      */
     public void announceScoreEntry(ScoreTableEntry entry, int i) {
-        Player player = entry.getPlayer().getBukkitPlayer();
+        GamePlayer player = entry.getPlayer();
         if (player == null)
             return;
 
-        getPlayers().forEach(gamePlayer -> {
-            Player target = gamePlayer.getBukkitPlayer();
-
+        getBukkitPlayers().forEach(p -> {
             Component winEntry = text("         ")
                     .append(translatable("game.end.win_section.prefix." + i, NamedTextColor.DARK_AQUA))
                     .append(text(" - ", NamedTextColor.GRAY))
-                    .append(text(player.getName(), NamedTextColor.AQUA))
+                    .append(player.displayName())
                     .append(entry.getPoints() != -1 ?
                             text(" ", NamedTextColor.GRAY)
                                     .append(text("(" + entry.getPoints()))
@@ -273,7 +270,7 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
                     .append(text(entry.getCoins(), NamedTextColor.AQUA))
                     .append(text("\u26C3", NamedTextColor.GOLD)); // TODO use grand currency
 
-            target.sendMessage(winEntry);
+            p.sendMessage(winEntry);
         });
     }
 
@@ -286,6 +283,9 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
         ScoreTableEntry[] scores = new ScoreTableEntry[3];
         switch (config.getMode()) {
             case PRESENCE -> {
+                if(getActivePlayers().size() > 1)
+                    return scores;
+
                 lastActivePlayers.addAll(getActivePlayers());
                 for (int i = 2; i > -1; i--) {
                     if (lastActivePlayers.size() - 1 >= i) {
@@ -397,13 +397,16 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
      */
     public GamePlayer getPlayer(Player player) {
         return getPlayers().stream()
-                .filter(p -> p.getBukkitPlayer().equals(player))
+                .filter(p -> {
+                    Player b = p.getBukkitPlayer();
+                    return b != null && b.equals(player);
+                })
                 .findAny()
                 .orElse(null);
     }
 
     public Map<GamePlayer, Integer> getPointsMap() {
-        List<GamePlayer> players = getActivePlayers();
+        List<GamePlayer> players = getPlayers();
         Map<GamePlayer, Integer> map = new HashMap<>();
         players.forEach(gamePlayer -> map.put(gamePlayer, gamePlayer.getPoints()));
 
@@ -439,6 +442,7 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
     public List<Player> getBukkitPlayers() {
         return getPlayers().stream()
                 .map(GamePlayer::getBukkitPlayer)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

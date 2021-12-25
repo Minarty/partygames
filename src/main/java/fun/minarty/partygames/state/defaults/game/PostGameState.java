@@ -24,7 +24,7 @@ public class PostGameState extends CustomState {
         game.getActivePlayers().forEach(statisticManager::updateLongestSurvivingTime);
         statisticManager.recordStatistics(game);
 
-        game.getPlayers().stream()
+        game.getActivePlayers().stream()
                 .filter(Objects::nonNull)
                 .forEach(g -> {
                     plugin.getCooldowner().remove(g); // Just in case

@@ -51,16 +51,9 @@ public class PartyScoreboardManager {
             return;
 
         Scoreboard scoreboard = null;
-        switch (type){
-            case GAME:{
-                scoreboard = new GameScoreboard(player.getGame());
-                break;
-            }
-
-            case LOBBY:{
-                scoreboard = new LobbyScoreboard(user, textFormatter);
-                break;
-            }
+        switch (type) {
+            case GAME -> scoreboard = new GameScoreboard(player.getGame());
+            case LOBBY -> scoreboard = new LobbyScoreboard(user, textFormatter);
         }
 
         if(scoreboard == null)
@@ -108,6 +101,9 @@ public class PartyScoreboardManager {
 
         game.getPlayers().forEach(gamePlayer -> {
             Player player = gamePlayer.getBukkitPlayer();
+            if(player == null)
+                return;
+
             Scoreboard scoreboard = scoreboardManager.getScoreboard(player);
 
             if(scoreboard != null){
@@ -122,7 +118,7 @@ public class PartyScoreboardManager {
                     int i = 0;
                     for (Map.Entry<GamePlayer, Integer> topEntry : topEntries) {
                         // Stop adding entries if we have reached the limit of 5 or active players count
-                        if (i == 6 || i == game.getActivePlayers().size()) {
+                        if (i == 6 || i == game.getPlayers().size()) {
                             break;
                         }
 
@@ -132,8 +128,8 @@ public class PartyScoreboardManager {
 
                         GamePlayer key = topEntry.getKey();
 
-                        if(key != null && key.getBukkitPlayer() != null) {
-                            entry.update(formatTopPlayerEntry(i, key.getBukkitPlayer().displayName(), topEntry.getValue()));
+                        if(key != null) {
+                            entry.update(formatTopPlayerEntry(i, key.displayName(), topEntry.getValue()));
                         }
 
                         i++;

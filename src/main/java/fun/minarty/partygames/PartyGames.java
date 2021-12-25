@@ -361,6 +361,9 @@ public final class PartyGames extends JavaPlugin {
      */
     public void sendToLobby(GamePlayer gamePlayer, boolean logIn, boolean postGame) {
         Player player = gamePlayer.getBukkitPlayer();
+        if(player == null)
+            return;
+
         if (!postGame) // If this is post game,
             gameManager.clearGameFromPlayer(player);
 

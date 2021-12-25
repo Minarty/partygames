@@ -11,8 +11,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import static fun.minarty.partygames.scoreboard.ScoreboardConstants.formatTopPlayerEntry;
 
@@ -50,17 +51,15 @@ public class GameScoreboard extends Scoreboard {
                     new ScoreboardEntry(Component.translatable("scoreboard.top",
                             Style.style(NamedTextColor.AQUA, TextDecoration.BOLD))));
 
-            int entriesToAdd = Math.min(game.getActivePlayers().size(), 5);
+            List<GamePlayer> players = game.getPlayers();
+            int entriesToAdd = Math.min(players.size(), 5);
             for (int i = 0; i < entriesToAdd; i++) {
-                GamePlayer gamePlayer = game.getActivePlayers().get(i);
+                GamePlayer gamePlayer = players.get(i);
                 if (gamePlayer == null)
                     continue;
 
-                Player p = gamePlayer.getBukkitPlayer();
-                if (p == null)
-                    continue;
-
-                general = general.id("topEntry" + i, new ScoreboardEntry(formatTopPlayerEntry(i, p.displayName(), 0)));
+                general = general.id("topEntry" + i,
+                        new ScoreboardEntry(formatTopPlayerEntry(i, gamePlayer.displayName(), gamePlayer.getPoints())));
             }
         }
 

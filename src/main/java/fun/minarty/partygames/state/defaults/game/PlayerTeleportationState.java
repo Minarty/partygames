@@ -34,7 +34,7 @@ public class PlayerTeleportationState extends CustomState {
         if(spawns == null)
             return;
 
-        List<GamePlayer> players = game.getPlayers();
+        List<GamePlayer> players = game.getActivePlayers();
 
         switch (game.getConfig().getSpawnMode()){
             case FIRST:{

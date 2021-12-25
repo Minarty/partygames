@@ -1,5 +1,6 @@
 package fun.minarty.partygames.model.game;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import fun.minarty.partygames.PartyGames;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class GamePlayer {
     private final UUID uniqueId;
     private final UUID player;
     @Getter @Setter
+    @JsonIgnore
     private PartyGame game;
     @Getter @Setter
     private State state;
@@ -30,6 +32,7 @@ public class GamePlayer {
     private boolean ready;
 
     private final Map<String, Object> data = new HashMap<>();
+    private Component displayName = Component.text("Name");
 
     @Builder
     public GamePlayer(UUID uniqueId, UUID player){
@@ -74,10 +77,10 @@ public class GamePlayer {
     public <T> T getData(String key, Class<T> tClass){
         try {
             Object data = getData(key);
-            if(data == null && tClass.isAssignableFrom(Number.class))
+            if(data == null && tClass == Integer.class)
                 return tClass.cast(0);
 
-            tClass.cast(data);
+            return tClass.cast(data);
         } catch (ClassCastException ex){
             ex.printStackTrace();
         }
@@ -92,6 +95,14 @@ public class GamePlayer {
      */
     public Object getData(String key){
         return data.get(key);
+    }
+
+    public Component displayName(){
+        Player player = getBukkitPlayer();
+        if(player != null)
+            displayName = player.displayName();
+
+        return displayName;
     }
 
     /**
@@ -119,6 +130,7 @@ public class GamePlayer {
      * Gets the bukkit player associated with the GamePlayer
      * @return bukkit player
      */
+    @JsonIgnore
     public Player getBukkitPlayer(){
         return Bukkit.getPlayer(player);
     }

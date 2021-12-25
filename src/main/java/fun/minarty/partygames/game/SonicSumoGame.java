@@ -1,17 +1,17 @@
 package fun.minarty.partygames.game;
 
+import fun.minarty.partygames.PartyGames;
 import fun.minarty.partygames.api.model.config.GameConfig;
 import fun.minarty.partygames.api.model.game.GameType;
+import fun.minarty.partygames.event.PlayerKilledEvent;
+import fun.minarty.partygames.model.game.GamePlayer;
 import fun.minarty.partygames.model.game.PartyGame;
 import fun.minarty.partygames.state.StateListen;
 import fun.minarty.partygames.state.defaults.FullPlayingState;
-import fun.minarty.partygames.PartyGames;
-import fun.minarty.partygames.event.PlayerKilledEvent;
-import fun.minarty.partygames.model.game.GamePlayer;
 import net.minikloon.fsmgasm.State;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -43,6 +43,13 @@ public class SonicSumoGame extends PartyGame {
 
         public PlayingState(PartyGame game, PartyGames plugin) {
             super(game, plugin);
+        }
+
+        @StateListen
+        public void onShift(PlayerToggleSneakEvent event){
+            if(event.isSneaking()){
+                event.setCancelled(true);
+            }
         }
 
         @StateListen

@@ -1,14 +1,19 @@
 package fun.minarty.partygames.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fun.minarty.partygames.PartyGames;
 import fun.minarty.partygames.manager.GameManager;
+import fun.minarty.partygames.model.game.GamePlayer;
 import fun.minarty.partygames.state.GameState;
 import fun.minarty.partygames.state.ScheduledStateSeries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -61,6 +66,43 @@ public class GameCommand implements CommandExecutor {
                 plugin.setMinimumPlayers(Integer.parseInt(args[1]));
                 sender.sendMessage("Set minimum players to " + args[1]);
                 break;
+            }
+
+            case "player":{
+                Player player = Bukkit.getPlayer(args[1]);
+                if(player == null)
+                    return true;
+
+                GamePlayer gamePlayer = plugin.getPlayerManager().getGamePlayerByPlayer(player);
+                if(gamePlayer == null)
+                    return true;
+
+                switch (args[2]){
+                    case "debug":{
+                        try {
+                            sender.sendMessage(new ObjectMapper().writeValueAsString(gamePlayer));
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    case "setstate":{
+                        GamePlayer.State state = GamePlayer.State.valueOf(args[3]);
+                        gamePlayer.setState(state);
+
+                        sender.sendMessage("Set state for " + player.getName() + " to " + state.name());
+                        break;
+                    }
+                    case "setpoints":{
+                        int points = Integer.parseInt(args[3]);
+                        gamePlayer.setPoints(points);
+                        sender.sendMessage("Set points for " + player.getName() + " to " + points);
+                        break;
+                    }
+                }
+
+                break;
+
             }
 
             case "reset":

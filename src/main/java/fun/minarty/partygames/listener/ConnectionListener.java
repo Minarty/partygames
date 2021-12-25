@@ -68,7 +68,7 @@ public class ConnectionListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        plugin.getGameManager().clearGameFromPlayer(player);
+        // plugin.getGameManager().clearGameFromPlayer(player);
 
         player.getInventory().clear();
         plugin.getHotbarManager().clearHotbar(player);
@@ -79,7 +79,12 @@ public class ConnectionListener implements Listener {
         if(gamePlayer == null)
             return;
 
-        playerManager.clearPlayer(gamePlayer);
+        gamePlayer.setReady(false);
+        gamePlayer.setState(GamePlayer.State.STANDBY);
+
+        if(gamePlayer.getGame() == null || gamePlayer.getGame().isEnded()) {
+            playerManager.clearPlayer(gamePlayer);
+        }
     }
 
 }
