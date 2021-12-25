@@ -120,6 +120,9 @@ public final class PartyGames extends JavaPlugin {
         // In case of reload
         Bukkit.getOnlinePlayers().forEach(player -> {
             GamePlayer gamePlayer = playerManager.cachePlayer(player);
+            if(player.getName().equals("Essl"))
+                gamePlayer.setReady(false);
+
             scoreboardManager.setScoreboard(gamePlayer, PartyScoreboardManager.Type.LOBBY);
         });
 
@@ -280,12 +283,13 @@ public final class PartyGames extends JavaPlugin {
      */
     private void registerCommonPlaceholders(Gatus common) {
         common.getPlaceholderManager().registerPlaceholder("party_level", audience -> {
-            if (audience instanceof Player) {
-                Profile profile = storeProvider.getProfileStore().get(((Player) audience).getUniqueId());
+            if (audience instanceof Player player) {
+                Profile profile = storeProvider.getProfileStore().get(player.getUniqueId());
                 if(profile == null)
                     return "0";
 
-                return String.valueOf(levelManager.getLevelForXp(profile.getXp()));
+                int xp = levelManager.getLevelForXp(profile.getXp());
+                return String.valueOf(xp);
             }
 
             return "0";
@@ -359,6 +363,8 @@ public final class PartyGames extends JavaPlugin {
         Player player = gamePlayer.getBukkitPlayer();
         if (!postGame) // If this is post game,
             gameManager.clearGameFromPlayer(player);
+
+        gamePlayer.setState(GamePlayer.State.STANDBY);
 
         transformLobbyPlayer(player);
         if(!logIn) // If it's login this will be applied when the client locale is ready, which it isn't directly.

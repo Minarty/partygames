@@ -35,10 +35,10 @@ public class GameCreatorCommand implements CommandExecutor {
 
     // TODO this class needs some refactoring and command validation, description etc
 
-    private GameType currentGame;
-    private final Map<String, Object> sessions = new HashMap<>();
+    private GameType currentGameType;
+    private final Map<String, Object> currentSession = new HashMap<>();
     private final Map<String, Map<String, Object>> customObjects = new HashMap<>();
-    private final Map<UUID, Object> property = new HashMap<>();
+    private final Map<UUID, Object> properties = new HashMap<>();
 
     private static final UUID CONSOLE_UUID = UUID.randomUUID();
     private static final DefaultConfig DEFAULT_CONFIG = new DefaultConfig();
@@ -79,29 +79,29 @@ public class GameCreatorCommand implements CommandExecutor {
         boolean customObj = args.length == 4;
         switch (args[0]){
             case "edit":{
-                if (currentGame != null) {
+                if (currentGameType != null) {
                     sender.sendMessage("Not saved, use /gamecreator discard");
                     return true;
                 }
 
                 sender.sendMessage("Loading config..");
 
-                currentGame = GameType.valueOf(args[1]);
-                GameConfig config = plugin.getStoreProvider().getConfigManager().loadConfig(currentGame);
+                currentGameType = GameType.valueOf(args[1]);
+                GameConfig config = plugin.getStoreProvider().getConfigManager().loadConfig(currentGameType);
                 if(config == null){
                     sender.sendMessage("Could not load config.");
                     return true;
                 }
 
-                sessions.clear();
+                currentSession.clear();
 
                 try {
-                    sessions.putAll(getValues(config));
+                    currentSession.putAll(getValues(config));
                 } catch (InvocationTargetException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
 
-                sender.sendMessage("Loaded " + sessions.keySet().size() + " keys from config for game type " + currentGame.name());
+                sender.sendMessage("Loaded " + currentSession.keySet().size() + " keys from config for game type " + currentGameType.name());
                 break;
             }
 
@@ -117,7 +117,7 @@ public class GameCreatorCommand implements CommandExecutor {
                 }
 
                 Object o = parseProperty(mode, str.toString().trim());
-                property.put(player == null ? CONSOLE_UUID : player.getUniqueId(), o);
+                properties.put(player == null ? CONSOLE_UUID : player.getUniqueId(), o);
 
                 Bukkit.dispatchCommand(sender, "gamecreator " +
                         (args[0].equalsIgnoreCase("setproperty") ? "setobject" : "addobject") + " " + name + " property");
@@ -140,7 +140,7 @@ public class GameCreatorCommand implements CommandExecutor {
                 if(customObj){
                     putCustomObject(args[3], name, typeObject);
                 } else {
-                    sessions.put(name, typeObject);
+                    currentSession.put(name, typeObject);
                 }
 
                 sender.sendMessage("Set object " + name);
@@ -171,40 +171,34 @@ public class GameCreatorCommand implements CommandExecutor {
                     list.add(typeObject);
                     putCustomObject(args[3], name, list);
                 } else {
-                    List list = getOrCreateList(name, sessions);
+                    List list = getOrCreateList(name, currentSession);
                     if(list == null)
                         return true;
 
                     list.add(typeObject);
-                    sessions.put(name, list);
+                    currentSession.put(name, list);
                 }
 
                 sender.sendMessage("Added object to list " + name);
-
                 break;
             }
 
             case "discard":{
-                currentGame = null;
-                sessions.clear();
+                currentGameType = null;
+                currentSession.clear();
 
                 sender.sendMessage("Discarded config");
                 break;
             }
 
             case "clearobject":{
-                sessions.remove(args[1]);
+                currentSession.remove(args[1]);
+                sender.sendMessage("Cleared property " + args[1]);
                 break;
             }
 
             case "save":{
                 ObjectMapper mapper = plugin.getStoreProvider().getConfigManager().getMapper();
-
-                try {
-                    sender.sendMessage(mapper.writeValueAsString(sessions));
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
 
                 Map<String, Object> defaultValues = null;
                 try {
@@ -216,7 +210,7 @@ public class GameCreatorCommand implements CommandExecutor {
                 if(defaultValues == null)
                     return true;
 
-                Iterator<Map.Entry<String, Object>> it = sessions.entrySet().iterator();
+                Iterator<Map.Entry<String, Object>> it = currentSession.entrySet().iterator();
                 while (it.hasNext()){ // Remove entries that haven't been changed
                     Map.Entry<String, Object> entry = it.next();
                     String key = entry.getKey();
@@ -230,20 +224,17 @@ public class GameCreatorCommand implements CommandExecutor {
                     }
                 }
 
-                if(currentGame == null)
-                    System.out.print("current null?");
-
                 try {
                     plugin.getCommon().getMongoManager().getDatabase()
                             .getCollection("party_gameconfig")
-                            .replaceOne(Filters.eq("gameType", currentGame.name()),
-                                    Document.parse(mapper.writeValueAsString(sessions)));
+                            .replaceOne(Filters.eq("gameType", currentGameType.name()),
+                                    Document.parse(mapper.writeValueAsString(currentSession)));
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
 
                 sender.sendMessage("Successfully saved!");
-                currentGame = null;
+                currentGameType = null;
 
                 break;
             }
@@ -259,20 +250,17 @@ public class GameCreatorCommand implements CommandExecutor {
      * @return parsed object or return back input
      */
     private Object parseProperty(String type, String input){
-        switch (type.toLowerCase(Locale.ROOT)){
-            case "int":{
+        switch (type.toLowerCase(Locale.ROOT)) {
+            case "int" -> {
                 return Integer.parseInt(input);
             }
-
-            case "boolean":{
+            case "boolean" -> {
                 return Boolean.parseBoolean(input);
             }
-
-            case "double":{
+            case "double" -> {
                 return Double.parseDouble(input);
             }
-
-            default:{
+            default -> {
                 return input;
             }
         }
@@ -316,34 +304,31 @@ public class GameCreatorCommand implements CommandExecutor {
 
     private Object getTypeObject(CommandSender sender, String type){
         // TODO enum with console property
-        switch (type.toLowerCase(Locale.ROOT)){
-            case "loc":{
+        switch (type.toLowerCase(Locale.ROOT)) {
+            case "loc" -> {
                 Player player = getPlayer(sender);
-                if(player == null)
+                if (player == null)
                     return null;
 
                 return player.getLocation();
             }
-
-            case "wgmin":{
+            case "wgmin" -> {
                 Player player = getPlayer(sender);
-                if(player == null)
+                if (player == null)
                     return null;
 
                 return getLocation(player.getWorld(), getRegionSelection(player).getMinimumPoint());
             }
-
-            case "wgarea":{
+            case "wgarea" -> {
                 Player player = getPlayer(sender);
-                if(player == null)
+                if (player == null)
                     return null;
 
                 return getSelection(player);
             }
-
-            case "property":{
+            case "property" -> {
                 Player player = getPlayer(sender);
-                return property.get(player == null ? CONSOLE_UUID : player.getUniqueId());
+                return properties.get(player == null ? CONSOLE_UUID : player.getUniqueId());
             }
         }
 

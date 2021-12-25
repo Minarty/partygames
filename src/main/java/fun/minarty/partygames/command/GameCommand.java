@@ -2,6 +2,8 @@ package fun.minarty.partygames.command;
 
 import fun.minarty.partygames.PartyGames;
 import fun.minarty.partygames.manager.GameManager;
+import fun.minarty.partygames.state.GameState;
+import fun.minarty.partygames.state.ScheduledStateSeries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -43,8 +45,9 @@ public class GameCommand implements CommandExecutor {
             }
 
             case "freeze":{
-                sender.sendMessage("Froze current game state.");
-                gameManager.getMainState().setFrozen(true);
+                ScheduledStateSeries mainState = gameManager.getMainState();
+                mainState.setFrozen(!mainState.getFrozen());
+                sender.sendMessage("Current game state: " + (mainState.getFrozen() ? "Frozen": "Active"));
                 break;
             }
 

@@ -80,9 +80,6 @@ public class ConnectionListener implements Listener {
             return;
 
         playerManager.clearPlayer(gamePlayer);
-
-        if(gamePlayer.getGame() == null)
-            playerManager.clearCache(player);
     }
 
 }

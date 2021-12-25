@@ -6,6 +6,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -20,6 +22,18 @@ import java.util.Set;
 public class LobbyListener implements Listener {
 
     private static final Set<EntityType> ALLOWED_ENTITY_TYPES = Set.of(EntityType.AXOLOTL);
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event){
+        if(isInLobby(event.getPlayer()) && !shouldOverride(event.getPlayer()))
+            event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event){
+        if(isInLobby(event.getPlayer()) && !shouldOverride(event.getPlayer()))
+            event.setCancelled(true);
+    }
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event){
@@ -56,8 +70,11 @@ public class LobbyListener implements Listener {
     }
 
     private boolean isInLobby(Entity entity){
-
         return entity.getWorld().getName().equals("lobby");
+    }
+
+    private boolean shouldOverride(Entity entity){
+        return entity instanceof Player player && player.hasPermission("partygames.override.protection");
     }
 
 }

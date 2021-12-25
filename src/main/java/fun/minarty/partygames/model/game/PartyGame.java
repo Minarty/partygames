@@ -161,6 +161,9 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
             list.add(state);
     }
 
+    /**
+     * @see #addConditionalState(List, GameState, boolean)
+     */
     private void addConditionalState(List<State> list, GameState state, GameConfig.Conditions condition) {
         addConditionalState(list, state, condition.getFilter().test(config));
     }
@@ -282,12 +285,12 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
     public ScoreTableEntry[] getScoreTable() {
         ScoreTableEntry[] scores = new ScoreTableEntry[3];
         switch (config.getMode()) {
-            case PRESENCE: {
+            case PRESENCE -> {
                 lastActivePlayers.addAll(getActivePlayers());
                 for (int i = 2; i > -1; i--) {
                     if (lastActivePlayers.size() - 1 >= i) {
                         GamePlayer gamePlayer = lastActivePlayers.get(i);
-                        if(gamePlayer == null)
+                        if (gamePlayer == null)
                             continue;
 
                         int place = lastActivePlayers.size() - 1 - i;
@@ -299,13 +302,11 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
                     }
                 }
 
-                break;
             }
-
-            case FINISH_AREA: {
+            case FINISH_AREA -> {
                 for (int i = 0; i < 3 && i < places.size(); i++) {
                     GamePlayer gamePlayer = places.get(i);
-                    if(gamePlayer == null)
+                    if (gamePlayer == null)
                         continue;
 
                     scores[i] = ScoreTableEntry.builder()
@@ -314,14 +315,15 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
                             .reward(3 - i)
                             .build();
                 }
-                break;
             }
-
-            case POINTS: {
+            case POINTS -> {
                 int i = 0;
                 for (Map.Entry<GamePlayer, Integer> entry : getTopPointsPlayersByPoints().entrySet()) {
                     if (i == 3)
                         break;
+
+                    if(entry.getValue() < 1)
+                        continue;
 
                     scores[i] = ScoreTableEntry.builder()
                             .place(i)
@@ -332,7 +334,6 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
 
                     i++;
                 }
-                break;
             }
         }
 
@@ -402,7 +403,7 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
     }
 
     public Map<GamePlayer, Integer> getPointsMap() {
-        List<GamePlayer> players = getPlayers();
+        List<GamePlayer> players = getActivePlayers();
         Map<GamePlayer, Integer> map = new HashMap<>();
         players.forEach(gamePlayer -> map.put(gamePlayer, gamePlayer.getPoints()));
 
@@ -477,11 +478,8 @@ public abstract class PartyGame extends GameEventListener implements Game, Liste
     }
 
     public void announceActionbar(Component component){
-        for (GamePlayer player : getPlayers()) {
-            Player p = player.getBukkitPlayer();
-            if (p != null) {
-                p.sendActionBar(component);
-            }
+        for (Player player : getBukkitPlayers()) {
+            player.sendActionBar(component);
         }
     }
 

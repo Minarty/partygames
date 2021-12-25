@@ -8,6 +8,7 @@ import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimeProperties;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import com.grinderwolf.swm.plugin.SWMPlugin;
+import fun.minarty.partygames.api.model.game.GameType;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
@@ -37,10 +38,10 @@ public class MapManager {
      * Loads the map into a world and sets appropriate properties
      * @param type type of the game
      */
-    public void loadMap(String type, Consumer<SlimeWorld> consumer, boolean edit) {
+    public void loadMap(GameType type, Consumer<SlimeWorld> consumer, boolean edit) {
         logger.info("Loading map for " + type);
 
-        String name = "MG_" + type;
+        String name = getWorldName(type);
         SlimePropertyMap properties = new SlimePropertyMap();
         properties.setValue(SlimeProperties.SPAWN_X, 0);
         properties.setValue(SlimeProperties.SPAWN_Y, 100);
@@ -59,8 +60,14 @@ public class MapManager {
             return;
         }
 
-        activeWorld = name;
+        if(!edit)
+            activeWorld = name;
+
         consumer.accept(world);
+    }
+
+    public String getWorldName(GameType type){
+        return "MG_" + type.name();
     }
 
     public synchronized World loadSlimeWorld(SlimeWorld slimeWorld){
@@ -85,11 +92,20 @@ public class MapManager {
      * Cleans up the map by unloading the world and
      * deleting the active world directory
      */
-    public void cleanupMap(){
+    public void cleanupActiveMap(){
+        cleanupMap(activeWorld, false);
+    }
+
+    public void cleanupMap(String worldName, boolean save){
+        World world = Bukkit.getWorld(worldName);
+        if(world == null)
+            return;
+
         logger.info("Cleaning up world");
 
-        if(!Bukkit.unloadWorld(activeWorld, false)){
-            logger.log(Level.SEVERE, "Unable to unload game world " + activeWorld);
+        world.getPlayers().forEach(player -> Bukkit.dispatchCommand(player, "hub"));
+        if(!Bukkit.unloadWorld(world, save)){
+            logger.log(Level.SEVERE, "Unable to unload game world " + worldName);
             return;
         }
 

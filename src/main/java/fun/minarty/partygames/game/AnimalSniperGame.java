@@ -13,7 +13,10 @@ import fun.minarty.partygames.util.RandomUtil;
 import fun.minarty.partygames.util.cooldown.Cooldowner;
 import lombok.Data;
 import lombok.Getter;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minikloon.fsmgasm.State;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -21,6 +24,9 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
 import java.time.temporal.ChronoUnit;
@@ -135,8 +141,9 @@ public class AnimalSniperGame extends PartyGame {
             Location spawnLocation = spawnLocations.get(ThreadLocalRandom.current()
                     .nextInt(spawnLocations.size()));
 
+            TargetAnimalInfo animalInfo = RandomUtil.getWeightedRandom(weights, ThreadLocalRandom.current());
             Entity entity = spawnLocation.getWorld().spawnEntity(spawnLocation,
-                    RandomUtil.getWeightedRandom(weights, ThreadLocalRandom.current()).getType());
+                    animalInfo.getType());
 
             scheduleRepeating(() -> {
                 entity.setVelocity(entity.getVelocity().divide(new Vector(2, 2, 2)));

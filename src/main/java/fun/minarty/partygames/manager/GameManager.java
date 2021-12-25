@@ -139,14 +139,7 @@ public class GameManager {
         List<GamePlayer> players = game.getPlayers();
         players.forEach(gamePlayer -> plugin.getPlayerManager().clearPlayer(gamePlayer));
 
-        players.forEach(p -> {
-            Player bukkitPlayer = p.getBukkitPlayer();
-            if(bukkitPlayer == null || !bukkitPlayer.isOnline()){
-                plugin.getPlayerManager().clearCache(bukkitPlayer);
-            }
-        });
-
-        plugin.getMapManager().cleanupMap();
+        plugin.getMapManager().cleanupActiveMap();
         this.game = null;
     }
 
@@ -167,7 +160,7 @@ public class GameManager {
      */
     public void constructGame(GameType type, PartyGames plugin) {
         final MapManager mapManager = plugin.getMapManager();
-        mapManager.loadMap(type.name(), slimeWorld -> {
+        mapManager.loadMap(type, slimeWorld -> {
 
             PartyGame game;
             try {

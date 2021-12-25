@@ -34,8 +34,6 @@ public class LobbyCommand implements CommandExecutor {
         if(gamePlayer == null)
             return true;
 
-        gamePlayer.setState(GamePlayer.State.STANDBY);
-
         plugin.sendToLobby(gamePlayer, false,false);
         return true;
     }

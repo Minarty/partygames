@@ -1,6 +1,7 @@
 package fun.minarty.partygames.manager.event;
 
 import fun.minarty.partygames.PartyGames;
+import fun.minarty.partygames.model.game.GamePlayer;
 import fun.minarty.partygames.model.game.PartyGame;
 import org.bukkit.GameMode;
 import org.bukkit.World;
@@ -75,7 +76,8 @@ public class GameEventManager implements Listener {
         GameEventListener eventListener = null;
         if(event instanceof PlayerEvent){
             Player player = ((PlayerEvent) event).getPlayer();
-            if(player.getGameMode() == GameMode.SPECTATOR)
+            GamePlayer gamePlayer = plugin.getPlayerManager().getGamePlayerByPlayer(player);
+            if(player.getGameMode() == GameMode.SPECTATOR || gamePlayer.getState() == GamePlayer.State.SPECTATOR)
                 return;
 
             eventListener = getGameListener(player.getWorld());

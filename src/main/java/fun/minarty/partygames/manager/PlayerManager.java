@@ -66,14 +66,6 @@ public class PlayerManager {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Clears player from the cache
-     * @param player player to clear
-     */
-    public void clearCache(Player player){
-        playerCache.values()
-                .removeIf(gamePlayer -> gamePlayer.getBukkitPlayer().equals(player));
-    }
 
     /**
      * Sets the game for all players in the game

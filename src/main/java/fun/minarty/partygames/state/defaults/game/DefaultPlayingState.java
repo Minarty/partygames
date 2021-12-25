@@ -27,10 +27,10 @@ public class DefaultPlayingState extends FullPlayingState {
     @Override
     protected void onStart() {
         game.setTimeStart(System.currentTimeMillis());
-        game.getPlayers().forEach(gamePlayer ->
+        game.getActivePlayers().forEach(gamePlayer ->
                 plugin.getScoreboardManager().setScoreboard(gamePlayer, PartyScoreboardManager.Type.GAME));
 
-        game.getBukkitPlayers().forEach(player -> {
+        game.getActiveBukkitPlayers().forEach(player -> {
             player.setGameMode(game.getConfig().getGameMode());
             player.setHealth(20);
             player.getInventory().clear();

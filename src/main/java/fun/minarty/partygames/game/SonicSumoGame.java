@@ -11,6 +11,7 @@ import fun.minarty.partygames.model.game.GamePlayer;
 import net.minikloon.fsmgasm.State;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 

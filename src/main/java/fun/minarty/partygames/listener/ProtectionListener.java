@@ -32,18 +32,15 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-
         Entity entity = event.getEntity();
-        if (entity instanceof Player) {
-            Player player = (Player) entity;
+        if (entity instanceof Player player) {
             PartyGame game = plugin.getGameManager().getGameByPlayer(player);
             if(game == null)
                 return;
 
-            if (!game.getConfig().isInvincible())
+            if (game.getConfig().isInvincible())
                 event.setCancelled(true);
         }
-
     }
 
     @EventHandler
@@ -121,9 +118,14 @@ public class ProtectionListener implements Listener {
         }
     }
 
+    /**
+     * Handles an event where a block was modified.
+     * @param event event to handle
+     */
     private <T extends BlockEvent & Cancellable> void handleBlockModifyEvent(T event) {
         Player player = null;
 
+        // Gather who modified the block
         if (event instanceof BlockBreakEvent) {
             player = ((BlockBreakEvent) event).getPlayer();
         } else if (event instanceof BlockPlaceEvent) {
@@ -137,9 +139,7 @@ public class ProtectionListener implements Listener {
         if(game == null)
             return;
 
-        boolean allow = shouldOverride(player);
-
-        if(!game.getConfig().isWorldModifiable() || !allow){
+        if(!game.getConfig().isWorldModifiable() || !shouldOverride(player)){
             event.setCancelled(true);
         }
     }

@@ -33,6 +33,7 @@ public class VoteState extends GeneralState {
         if (plugin.getPlayersNeeded() > 0) {
             plugin.getGameManager().addPreGameStates();
         } else {
+            Bukkit.getOnlinePlayers().forEach(player -> plugin.setHotbarMode(player, false));
             plugin.getGameManager().constructGame(gameType, plugin);
         }
     }

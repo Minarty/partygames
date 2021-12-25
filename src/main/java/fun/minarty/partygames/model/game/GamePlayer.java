@@ -29,8 +29,6 @@ public class GamePlayer {
     @Getter @Setter
     private boolean ready;
 
-    @Getter @Setter
-    private int points;
     private final Map<String, Object> data = new HashMap<>();
 
     @Builder
@@ -59,6 +57,14 @@ public class GamePlayer {
         data.put(key, o);
     }
 
+    public int getPoints(){
+        return getData("points", Integer.class);
+    }
+
+    public void setPoints(int points){
+        setData("points", points);
+    }
+
     /**
      * Gets data and casts it to the type
      * @param key key to get
@@ -67,7 +73,11 @@ public class GamePlayer {
      */
     public <T> T getData(String key, Class<T> tClass){
         try {
-            tClass.cast(getData(key));
+            Object data = getData(key);
+            if(data == null && tClass.isAssignableFrom(Number.class))
+                return tClass.cast(0);
+
+            tClass.cast(data);
         } catch (ClassCastException ex){
             ex.printStackTrace();
         }

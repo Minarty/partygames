@@ -6,6 +6,7 @@ import fun.minarty.partygames.model.game.PartyGame;
 import fun.minarty.partygames.model.game.GamePlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -14,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Named;
 import java.util.List;
 
 /**
@@ -39,10 +41,16 @@ public class SpectateCommand implements CommandExecutor {
             return true;
         }
 
+        if(!game.getPlayingStateGroup().getStarted()){
+            player.sendMessage(Component.translatable("spectate.not_started", NamedTextColor.RED));
+            return true;
+        }
+
         GamePlayer gamePlayer = plugin.getPlayerManager().getGamePlayerByPlayer(player);
         if(gamePlayer.getState() == GamePlayer.State.SPECTATOR || game.getPlayers().contains(gamePlayer))
             return true;
 
+        gamePlayer.setGame(game);
         game.getPlayers().add(gamePlayer);
         plugin.getScoreboardManager()
                 .setScoreboard(gamePlayer, PartyScoreboardManager.Type.GAME);
@@ -60,8 +68,10 @@ public class SpectateCommand implements CommandExecutor {
         }
 
         if(location == null){
-            player.sendMessage(Component.text("Unable to find a suitable location! Please wait for the game to end.",
+            player.sendMessage(Component.text("Unable to find a suitable spawn! Please wait for the game to end.",
                     NamedTextColor.RED));
+
+            Bukkit.dispatchCommand(player, "hub");
             return true;
         }
 

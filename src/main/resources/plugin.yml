@@ -3,6 +3,7 @@ version: "1.0"
 load: POSTWORLD
 api-version: "1.16"
 main: fun.minarty.partygames.PartyGames
+website: "https://github.com/Minarty/"
 depend: [Gatus, Grand, SlimeWorldManager]
 softdepend: [FastAsyncWorldEdit]
 author: "Minarty"
