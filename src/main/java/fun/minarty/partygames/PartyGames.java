@@ -120,9 +120,6 @@ public final class PartyGames extends JavaPlugin {
         // In case of reload
         Bukkit.getOnlinePlayers().forEach(player -> {
             GamePlayer gamePlayer = playerManager.cachePlayer(player);
-            if(player.getName().equals("Essl"))
-                gamePlayer.setReady(false);
-
             scoreboardManager.setScoreboard(gamePlayer, PartyScoreboardManager.Type.LOBBY);
         });
 
