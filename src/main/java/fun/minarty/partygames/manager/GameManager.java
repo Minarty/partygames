@@ -52,7 +52,7 @@ public class GameManager {
         addGameType(GameType.MATCH_THE_WOOL, MatchTheWoolGame.class, MatchTheWoolConfig.class);
         addGameType(GameType.FLOOD_ESCAPE, FloodEscapeGame.class, FloodEscapeConfig.class);
         addGameType(GameType.SONIC_SUMO, SonicSumoGame.class);
-        addGameType(GameType.MINI_SKYWARS, SkyWarsGame.class, SkyWarsConfig.class);
+        //addGameType(GameType.MINI_SKYWARS, SkyWarsGame.class, SkyWarsConfig.class);
         addGameType(GameType.ANIMAL_SNIPER, AnimalSniperGame.class, AnimalSniperConfig.class);
         addGameType(GameType.MEMORY, MemoryGame.class, MemoryConfig.class);
         addGameType(GameType.QUICK_CLICK, QuickClickGame.class, QuickClickConfig.class);

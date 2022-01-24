@@ -13,5 +13,6 @@ public class MemoryConfig extends DefaultConfig {
 
     private List<Cuboid> platforms;
     private List<Cuboid> indicators;
+    private Cuboid platformArea;
 
 }

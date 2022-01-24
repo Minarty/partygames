@@ -60,8 +60,8 @@ public class MapManager {
             return;
         }
 
-        if(!edit)
-            activeWorld = name;
+        // TODO need better solution, both normal games and gamecreator uses this.
+        activeWorld = name;
 
         consumer.accept(world);
     }

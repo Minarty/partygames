@@ -52,7 +52,7 @@ public final class DefaultCuboid implements Cuboid, Iterable<Block> {
         if (high == null || low == null)
             throw new NullPointerException("Location can not be null");
         else if (high.getWorld() == null || low.getWorld() == null)
-            throw new IllegalStateException("Can not create a Cuboid for an unloaded world");
+            throw new IllegalStateException("Can not create a Cuboid for an unloaded world " + high.getWorld().getName());
         else if (!high.getWorld().getName().equals(low.getWorld().getName()))
             throw new IllegalStateException("Can not create a Cuboid between two different worlds");
         worldName = high.getWorld().getName();

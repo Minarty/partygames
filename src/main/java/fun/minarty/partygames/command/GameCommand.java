@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fun.minarty.partygames.PartyGames;
 import fun.minarty.partygames.manager.GameManager;
 import fun.minarty.partygames.model.game.GamePlayer;
-import fun.minarty.partygames.state.GameState;
 import fun.minarty.partygames.state.ScheduledStateSeries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,6 +14,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 /**
  * Admin command to handle various game related actions <br>
@@ -77,6 +78,9 @@ public class GameCommand implements CommandExecutor {
                 if(gamePlayer == null)
                     return true;
 
+                if(args.length < 3)
+                    return true;
+
                 switch (args[2]){
                     case "debug":{
                         try {
@@ -87,13 +91,29 @@ public class GameCommand implements CommandExecutor {
                         break;
                     }
                     case "setstate":{
+                        if(args.length != 4)
+                            return true;
+
                         GamePlayer.State state = GamePlayer.State.valueOf(args[3]);
                         gamePlayer.setState(state);
 
                         sender.sendMessage("Set state for " + player.getName() + " to " + state.name());
                         break;
                     }
+                    case "setready":{
+                        if(args.length != 4)
+                            return true;
+
+                        boolean value = Boolean.parseBoolean(args[3].toLowerCase(Locale.ROOT));
+                        gamePlayer.setReady(value);
+
+                        sender.sendMessage("Set ready for " + player.getName() + " to " + value);
+                        break;
+                    }
                     case "setpoints":{
+                        if(args.length != 4)
+                            return true;
+
                         int points = Integer.parseInt(args[3]);
                         gamePlayer.setPoints(points);
                         sender.sendMessage("Set points for " + player.getName() + " to " + points);

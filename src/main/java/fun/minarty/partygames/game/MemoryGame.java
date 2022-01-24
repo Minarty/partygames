@@ -26,6 +26,7 @@ public class MemoryGame extends PartyGame {
     private final StateSeries roundSeries = new EndingScheduledStateSeries(plugin);
     private List<Cuboid> platforms;
     private List<Cuboid> indicators;
+    private Cuboid platformArea;
 
     private static final Map<Material, ChatColor> COLOURS = Map.of(
             Material.RED_CONCRETE, ChatColor.DARK_RED,
@@ -55,6 +56,7 @@ public class MemoryGame extends PartyGame {
         MemoryConfig memoryConfig = (MemoryConfig) getConfig();
         platforms  = memoryConfig.getPlatforms();
         indicators = memoryConfig.getIndicators();
+        platformArea = memoryConfig.getPlatformArea();
 
         Set<State> states = new HashSet<>();
         checkRound();
@@ -111,6 +113,7 @@ public class MemoryGame extends PartyGame {
 
         @Override
         protected void onStart() {
+            setFloor(true);
             updateColours(true);
             showPlayers();
         }
@@ -130,11 +133,22 @@ public class MemoryGame extends PartyGame {
                 game.showPlayers();
                 for (Cuboid platform : platforms) {
                     platform.fill(memory.get(platform));
+                    setFloor(false);
                     platform.getBlocks().stream()
                             .filter(block -> block.getType() != selectedType)
                             .forEach(block -> block.setType(Material.AIR));
                 }
             }
+        }
+
+        private void setFloor(boolean floor){
+            platformArea.getBlocks()
+                    .stream()
+                    .filter(block -> {
+                        Material type = block.getType();
+                        return type == (floor ? Material.AIR : Material.BARRIER);
+                    })
+                    .forEach(block -> block.setType(floor ? Material.BARRIER : Material.AIR));
         }
 
         private Material getRandomColour(){
